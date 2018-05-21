@@ -1,3 +1,11 @@
+ID       else1
+ID       els
+ID       elssss
+ID       els
+SYMBOL   =
+K_WORD   else
+K_WORD   else
+ERROR    __
 COMMENT  /* A program */
 K_WORD   int
 ID       gcd
