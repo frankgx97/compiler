@@ -33,18 +33,18 @@ S:
 ;
 
 Stmt:
-    Declare ';'                 { printf("\n\n"); }
+    Declare O_SEMI                 { printf("\n\n"); }
 |   Assign                      { /* empty */ }
 |   Printf                       { /* empty */ }
 ;
 
 Declare:
-    K_INT SPACES ID          { printf("var %s", $2); }
-|   Declare ',' ID    { printf(", %s", $3); }
+    K_INT ID                { printf("var %s", $2); }
+|   Declare O_COMMA ID    { printf(", %s", $3); }
 ;
 
 Assign:
-    ID '=' E ';'      { printf("pop %s\n\n", $1); }
+    ID O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
 ;
 
 Printf:
@@ -52,11 +52,11 @@ Printf:
 ;
 
 E:
-    E '+' E                     { printf("add\n"); }
-|   E '-' E                     { printf("sub\n"); }
-|   E '*' E                     { printf("mul\n"); }
-|   E '/' E                     { printf("div\n"); }
-|   '-' E %prec U_neg           { printf("neg\n"); }
+    E O_ADD E                     { printf("add\n"); }
+|   E O_SUB E                     { printf("sub\n"); }
+|   E O_MUL E                     { printf("mul\n"); }
+|   E O_DIV E                     { printf("div\n"); }
+|   O_SUB E %prec U_neg           { printf("neg\n"); }
 |   NUM                         { printf("push %s\n", $1); }
 |   ID                          { printf("push %s\n", $1); }
 |   '(' E ')'                   { /* empty */ }
