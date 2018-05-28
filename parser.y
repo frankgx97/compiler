@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 //#include "symbols.h"
-//#define YYSTYPE char *
+#define YYSTYPE char *
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -39,7 +39,7 @@ Stmt:
 ;
 
 Declare:
-    K_INT ID          { printf("var %s", $2); }
+    K_INT SPACES ID          { printf("var %s", $2); }
 |   Declare ',' ID    { printf(", %s", $3); }
 ;
 
@@ -68,6 +68,6 @@ int main(int argc,char* argv[]) {
 	//yyin  = fopen( "in.txt",  "r" );
 	//yyout = fopen( "out.txt", "w" );
     yyin = fopen(argv[1],"r");
-	while(yylex());
-    yyparse();
+	//while(yylex());
+    return yyparse();
 }
