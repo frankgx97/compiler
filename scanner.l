@@ -38,12 +38,9 @@ COMMENT	\/\*([^\*^\/]*|[\*^\/*]*|[^\**\/]*)*\*\/
 
 %%
 
-{COMMENT} { return COMMENT; }
+{SPACES}    { /* ignore */ }
+{COMMENT}   { /* ignore */ }
 
-{SPACES} {
-//	fprintf( yyout, "SPC\n");
-	return SPACES;
-}
 
 {U_LEGAL} { return U_LEGAL; }
 
