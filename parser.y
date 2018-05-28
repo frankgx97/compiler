@@ -11,9 +11,10 @@ void yyerror(const char*);
 int yylex();
 %}
 
-%token NO_ID NUM K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE ID K_PRINTF
-%token ID O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER 
-%token O_RMBRACKER O_LLBRACKER O_RLBRACKER O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
+%token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF
+%token ID NO_ID NUM 
+%token O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER O_RMBRACKER O_LLBRACKER O_RLBRACKER
+%token O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
 %token COMMENT SPACES U_LEGAL
 
 %left '+' '-'
@@ -23,13 +24,36 @@ int yylex();
 %define parse.error verbose 
 %locations
 
-%start S
+%start Program
 
 %%
 
-S:   
-    Stmt                        { /* empty */ }
-|   S Stmt                      { /* empty */ }
+Program:
+               {/**/}
+|   Program FunctionDeclare     {/**/}
+|   Program                     {/**/}
+;
+
+FunctionDeclare:
+    ReturnType FunctionName O_LSBRACKER Args O_RSBRACKER O_LLBRACKER FunctionContent O_RLBRACKER {}
+;
+
+ReturnType:
+    K_INT                       {/**/}
+|    K_VOID                      {/**/}
+;
+
+FunctionName:
+    ID                          {/**/}
+;
+
+Args:
+    ID Args                     {/**/}
+;
+
+FunctionContent:
+    Stmt                        {/**/}
+|   FunctionContent Stmt        {/**/}    
 ;
 
 Stmt:
@@ -48,7 +72,7 @@ Assign:
 ;
 
 Printf:
-    K_PRINTF '(' NO_ID')' ';' { printf("print %s\n\n", $3); }
+    K_PRINTF O_LSBRACKER ID O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
 ;
 
 E:
