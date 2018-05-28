@@ -1,14 +1,14 @@
 parser: lex.yy.c symbols.h y.tab.c
 	gcc y.tab.c lex.yy.c -o parser
 
-scanner:lex.yy.c symbols.h
-	gcc -o $@ $<
+scanner:lex.yy.c 
+	gcc -o lex.yy.c
 
 lex.yy.c: scanner.l
-	flex $
+	flex scanner.l
 
 y.tab.c: parser.y
-	bison -vdty $<
+	bison -vdty parser.y
 
 clean:
 	rm lex.yy.c lex.yy.exe scanner out.txt y.tab.c y.output y.tab.h parser

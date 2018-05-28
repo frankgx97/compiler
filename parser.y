@@ -1,7 +1,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#define YYSTYPE char *
+//#include "symbols.h"
+//#define YYSTYPE char *
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -11,6 +12,9 @@ int yylex();
 %}
 
 %token NO_ID NUM K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE ID K_PRINTF
+%token ID O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER 
+%token O_RMBRACKER O_LLBRACKER O_RLBRACKER O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
+%token COMMENT SPACES U_LEGAL
 
 %left '+' '-'
 %left '*' '/'
@@ -59,11 +63,6 @@ E:
 ;
 
 %%
-/*
-void yyerror(const char* msg) {
-    //sprintf(stderr, "%s\n", msg);
-    printf("%s", msg);
-}*/
 
 int main(int argc,char* argv[]) {
 	//yyin  = fopen( "in.txt",  "r" );

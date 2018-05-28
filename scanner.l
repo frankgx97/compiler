@@ -1,7 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "symbols.h"
+//#include "symbols.h"
+#define YYSTYPE char *
+#include "y.tab.h"
 
 #define LOG
 
@@ -36,48 +38,48 @@ COMMENT	\/\*([^\*^\/]*|[\*^\/*]*|[^\**\/]*)*\*\/
 
 %%
 
-{COMMENT} { return log(CMT,COMMENT); }
+{COMMENT} { return COMMENT; }
 
 {SPACES} {
 //	fprintf( yyout, "SPC\n");
 	return SPACES;
 }
 
-{U_LEGAL} { return log(ERROR,U_LEAGAL); }
+{U_LEGAL} { return U_LEGAL; }
 
-else 	{ return log(KEY_WORD,K_ELSE	); }
-if 		{ return log(KEY_WORD,K_IF		); }
-int 	{ return log(KEY_WORD,K_INT		); }
-return 	{ return log(KEY_WORD,K_RETURN	); }
-void 	{ return log(KEY_WORD,K_VOID	); }
-while 	{ return log(KEY_WORD,K_WHILE	); }
-printf	{ return log(KEY_WORD,K_PRINTF	); }
+else 	{ return K_ELSE ;}
+if 		{ return K_IF	 ;}
+int 	{ return K_INT	 ;}
+return 	{ return K_RETURN ;}
+void 	{ return K_VOID ;}
+while 	{ return K_WHILE ;}
+printf	{ return K_PRINTF ;}
 
-{ID} 	{ return log(ID,ID	); }
-{NUM} 	{ return log(NUM,NUM); }
+{ID} 	{ return ID ;}
+{NUM} 	{ return NUM ;}
 
-=	{ return log(SYMBOL,O_ASSIGN	); }
-,	{ return log(SYMBOL,O_COMMA		); }
-;	{ return log(SYMBOL,O_SEMI		); }
+=	{ return O_ASSIGN ;}
+,	{ return O_COMMA	 ;}
+;	{ return O_SEMI	 ;}
 
-\(	{ return log(SYMBOL,O_LSBRACKER); }
-\)	{ return log(SYMBOL,O_RSBRACKER); }
-\[	{ return log(SYMBOL,O_LMBRACKER); }
-\]	{ return log(SYMBOL,O_RMBRACKER); }
-\{	{ return log(SYMBOL,O_LLBRACKER); }
-\}	{ return log(SYMBOL,O_RLBRACKER); }
+\(	{ return O_LSBRACKER ;}
+\)	{ return O_RSBRACKER ;}
+\[	{ return O_LMBRACKER ;}
+\]	{ return O_RMBRACKER ;}
+\{	{ return O_LLBRACKER ;}
+\}	{ return O_RLBRACKER ;}
 
-\+	{ return log(SYMBOL,O_ADD); }
-\-	{ return log(SYMBOL,O_SUB); }
-\* 	{ return log(SYMBOL,O_MUL); }
-\/	{ return log(SYMBOL,O_DIV); }
+\+	{ return O_ADD ;}
+\-	{ return O_SUB ;}
+\* 	{ return O_MUL ;}
+\/	{ return O_DIV ;}
 
-\<	{ return log(SYMBOL,O_LESS		); }
-\<=	{ return log(SYMBOL,O_L_EQUAL	); }
->	{ return log(SYMBOL,O_GREATER	); }
->=	{ return log(SYMBOL,O_G_EQUAL	); }
-==	{ return log(SYMBOL,O_EQUAL		); }
-!=	{ return log(SYMBOL,O_U_EQUAL	); }
+\<	{ return O_LESS		 ;}
+\<=	{ return O_L_EQUAL	 ;}
+>	{ return O_GREATER	 ;}
+>=	{ return O_G_EQUAL	 ;}
+==	{ return O_EQUAL		 ;}
+!=	{ return O_U_EQUAL	 ;}
 
 %%
 int yywrap(){ return 1; }

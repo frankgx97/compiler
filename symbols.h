@@ -15,6 +15,7 @@
 #define K_INT		8
 #define K_RETURN	9
 #define K_VOID		10
+#define K_PRINTF    50 //后来添加的
 
 //symbol
 #define O_ADD		11

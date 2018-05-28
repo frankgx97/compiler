@@ -1,20 +1,7 @@
-else1
-els
-elssss
-els=
-else
-else__
 /* A program */
-int gcd(int u,int v){
-	if(6<=5)
-	if(v==0)
-		return u;
-	else
-		return gcd(v,u-u/v*v);
-}
-void main(){
-	int x; int y;
-	x = input();y = input();
-	output(gcd(x,y));
-}
-
+int x;
+int y;
+int result;
+x = 10;
+y = 20;
+result = x + y;
