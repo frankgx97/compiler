@@ -12,3 +12,6 @@ y.tab.c: parser.y
 
 clean:
 	rm lex.yy.c lex.yy.exe scanner out.txt y.tab.c y.output y.tab.h parser
+
+run:
+	./parser in.txt
