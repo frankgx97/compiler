@@ -52,8 +52,8 @@ void 	{ return K_VOID ;}
 while 	{ return K_WHILE ;}
 printf	{ return K_PRINTF ;}
 
-{ID} 	{ return ID ;}
-{NUM} 	{ return NUM ;}
+{ID} 	{ yylval = strdup(yytext); return ID ;}
+{NUM} 	{ yylval = strdup(yytext); return NUM ;}
 
 =	{ return O_ASSIGN ;}
 ,	{ return O_COMMA	 ;}
