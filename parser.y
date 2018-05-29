@@ -30,7 +30,6 @@ int yylex();
 Program:
         /**/                                {/**/}
 |       Program FunctionDeclare             {/**/}
-|       FunctionDeclare                     {/**/}
 ;
 
 FunctionDeclare:
@@ -47,31 +46,49 @@ FunctionName:
 ;
 
 Args:
-    ID Args                     {/**/}
+    ArgType ID                      {/**/}
 ;
 
+ArgType:
+    K_INT                   {/**/}
+;
+
+
 FunctionContent:
-    Stmt                        {/**/}
-|   FunctionContent Stmt        {/**/}    
+    Stmts                        {/**/}
+;
+
+Stmts:
+    /* empty */             { /* empty */ }
+|   Stmts Stmt              { /* empty */ }
 ;
 
 Stmt:
-    Declare O_SEMI                 { printf("\n\n"); }
-|   Assign                      { /* empty */ }
-|   Printf                       { /* empty */ }
+    DeclareStmt                 { printf("\n\n"); }
+|   AssignStmt                      { /* empty */ }
+|   PrintfStmt                       { /* empty */ }
+|   CallStmt                { /* empty */ }
+|   ReturnStmt              { /* empty */ }
 ;
 
-Declare:
-    K_INT ID                { printf("var %s", $2); }
-|   Declare O_COMMA ID    { printf(", %s", $3); }
+DeclareStmt:
+    K_INT ID O_SEMI         { printf("var %s", $2); }
 ;
 
-Assign:
+AssignStmt:
     ID O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
 ;
 
-Printf:
+PrintfStmt:
     K_PRINTF O_LSBRACKER ID O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
+;
+
+CallStmt:
+    ID O_LSBRACKER O_RSBRACKER O_SEMI   {/**/}
+;
+
+ReturnStmt:
+    K_RETURN ID O_SEMI                  {/**/}
 ;
 
 E:
