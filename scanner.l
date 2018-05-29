@@ -52,8 +52,8 @@ void 	{ return K_VOID ;}
 while 	{ return K_WHILE ;}
 printf	{ return K_PRINTF ;}
 
-{ID} 	{ yylval = strdup(yytext); return ID ;}
-{NUM} 	{ yylval = strdup(yytext); return NUM ;}
+{ID} 	{ printf("ID\n"); yylval = strdup(yytext); return ID ;}
+{NUM} 	{ printf("NUM\n");yylval = strdup(yytext); return NUM ;}
 
 =	{ return O_ASSIGN ;}
 ,	{ return O_COMMA	 ;}
@@ -83,7 +83,7 @@ int yywrap(){ return 1; }
 
 void yyerror(const char* msg) {
     //sprintf(stderr, "%s\n", msg);
-    printf("%s,Line %d", msg, yylineno);
+    printf("%s,%s,Line %d", yytext, msg, yylineno);
 }
 /*
 int main(){

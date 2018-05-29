@@ -1,5 +1,4 @@
-/* A program */
-void main(void){
+int main ( int ) {
     int x;
     int y;
     int result;

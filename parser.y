@@ -24,18 +24,17 @@ int yylex();
 %define parse.error verbose 
 %locations
 
-%start Program
 
 %%
 
 Program:
-               {/**/}
-|   Program FunctionDeclare     {/**/}
-|   Program                     {/**/}
+        /**/                                {/**/}
+|       Program FunctionDeclare             {/**/}
+|       FunctionDeclare                     {/**/}
 ;
 
 FunctionDeclare:
-    ReturnType FunctionName O_LSBRACKER Args O_RSBRACKER O_LLBRACKER FunctionContent O_RLBRACKER {}
+    ReturnType FunctionName O_LSBRACKER Args O_RSBRACKER O_LLBRACKER FunctionContent O_RLBRACKER {/**/}
 ;
 
 ReturnType:
