@@ -46,7 +46,13 @@ FunctionName:
 ;
 
 Args:
-    ArgType ID                      {/**/}
+    /* empty */             { /* empty */ }
+|    Arg                      {/**/}
+;
+
+Arg:
+    ArgType ID                 {}
+|   Arg O_COMMA ArgType ID     {}
 ;
 
 ArgType:
@@ -69,6 +75,17 @@ Stmt:
 |   PrintfStmt                       { /* empty */ }
 |   CallStmt                { /* empty */ }
 |   ReturnStmt              { /* empty */ }
+|   IfStmt                  {}
+|   WhileStmt               {}
+;
+
+IfStmt:
+    K_IF O_LSBRACKER E O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER    {}
+|   IfStmt K_ELSE O_LLBRACKER Stmts O_RLBRACKER                     {}
+;
+
+WhileStmt:
+    K_WHILE O_LSBRACKER E O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER {}
 ;
 
 DeclareStmt:
@@ -77,6 +94,7 @@ DeclareStmt:
 
 AssignStmt:
     ID O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
+|   ID O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
@@ -84,11 +102,14 @@ PrintfStmt:
 ;
 
 CallStmt:
-    ID O_LSBRACKER O_RSBRACKER O_SEMI   {/**/}
+   ID O_LSBRACKER Args O_RSBRACKER    {/**/}
+|  CallStmt O_SEMI                     {}
 ;
 
 ReturnStmt:
     K_RETURN ID O_SEMI                  {/**/}
+|   K_RETURN NUM O_SEMI                 {}
+|   K_RETURN O_SEMI                 {}
 ;
 
 E:
@@ -105,7 +126,6 @@ E:
 %%
 
 int main(int argc,char* argv[]) {
-	//yyin  = fopen( "in.txt",  "r" );
 	//yyout = fopen( "out.txt", "w" );
     yyin = fopen(argv[1],"r");
 	//while(yylex());

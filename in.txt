@@ -1,4 +1,17 @@
-void main ( int m) {
+int go(){
+    int x;
+    x = 1;
+    while(x){
+        x = x-1;
+    }
+    if(1){
+        return 5;
+    }else{
+        return 8;
+    }
+}
+
+void main (int m) {
     int x;
     int y;
     int result;
@@ -6,4 +19,7 @@ void main ( int m) {
     y = 20;
     result = x + y;
     printf (result);
+    result = go();
+    printf (result);
+    return;
 }
