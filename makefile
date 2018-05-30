@@ -14,4 +14,4 @@ clean:
 	rm lex.yy.c lex.yy.exe scanner out.txt y.tab.c y.output y.tab.h parser
 
 run:
-	make && ./parser in.txt
+	make && ./parser in.cm
