@@ -11,7 +11,7 @@ void yyerror(const char*);
 int yylex();
 %}
 
-%token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF
+%token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
 %token ID NO_ID NUM 
 %token O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER O_RMBRACKER O_LLBRACKER O_RLBRACKER
 %token O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
@@ -73,6 +73,7 @@ Stmt:
     DeclareStmt                 { printf("\n\n"); }
 |   AssignStmt                      { /* empty */ }
 |   PrintfStmt                       { /* empty */ }
+|   ReadStmt                {}
 |   CallStmt                { /* empty */ }
 |   ReturnStmt              { /* empty */ }
 |   IfStmt                  {}
@@ -99,6 +100,10 @@ AssignStmt:
 
 PrintfStmt:
     K_PRINTF O_LSBRACKER ID O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
+;
+
+ReadStmt:
+    K_READ O_LSBRACKER ID O_RSBRACKER O_SEMI    {}
 ;
 
 CallStmt:

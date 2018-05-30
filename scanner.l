@@ -51,6 +51,7 @@ return 	{ return K_RETURN ;}
 void 	{ return K_VOID ;}
 while 	{ return K_WHILE ;}
 printf	{ return K_PRINTF ;}
+read	{ return K_READ	;}
 
 {ID} 	{ printf("ID\n"); yylval = strdup(yytext); return ID ;}
 {NUM} 	{ printf("NUM\n");yylval = strdup(yytext); return NUM ;}
