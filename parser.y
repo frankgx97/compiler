@@ -51,8 +51,8 @@ Args:
 ;
 
 Arg:
-    ArgType ID                 {}
-|   Arg O_COMMA ArgType ID     {}
+    ArgType Id                 {}
+|   Arg O_COMMA ArgType Id     {}
 ;
 
 ArgType:
@@ -90,20 +90,20 @@ WhileStmt:
 ;
 
 DeclareStmt:
-    K_INT ID O_SEMI         { printf("var %s", $2); }
+    K_INT Id O_SEMI         { printf("var %s", $2); }
 ;
 
 AssignStmt:
-    ID O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
-|   ID O_ASSIGN CallStmt O_SEMI {}
+    Id O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
+|   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
-    K_PRINTF O_LSBRACKER ID O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
+    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
 ;
 
 ReadStmt:
-    K_READ O_LSBRACKER ID O_RSBRACKER O_SEMI    {}
+    K_READ O_LSBRACKER Id O_RSBRACKER O_SEMI    {}
 ;
 
 CallStmt:
@@ -112,8 +112,8 @@ CallStmt:
 ;
 
 ReturnStmt:
-    K_RETURN ID O_SEMI                  {/**/}
-|   K_RETURN NUM O_SEMI                 {}
+    K_RETURN Id O_SEMI                  {/**/}
+|   K_RETURN E O_SEMI                 {}
 |   K_RETURN O_SEMI                 {}
 ;
 
@@ -124,8 +124,13 @@ E:
 |   E O_DIV E                     { printf("div\n"); }
 |   O_SUB E %prec U_neg           { printf("neg\n"); }
 |   NUM                         { printf("push %s\n", $1); }
-|   ID                          { printf("push %s\n", $1); }
+|   Id                          { printf("push %s\n", $1); }
 |   '(' E ')'                   { /* empty */ }
+;
+
+Id:
+    ID                          {}
+|   ID O_LMBRACKER E O_RMBRACKER    {}
 ;
 
 %%

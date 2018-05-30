@@ -21,5 +21,7 @@ void main (int m) {
     printf (result);
     result = go();
     printf (result);
+    int index[5];
+    index[0] = 3;
     return;
 }
