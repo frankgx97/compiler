@@ -1,4 +1,4 @@
-parser: lex.yy.c symbols.h y.tab.c
+parser: lex.yy.c y.tab.c
 	gcc y.tab.c lex.yy.c -o parser
 
 scanner:lex.yy.c 
