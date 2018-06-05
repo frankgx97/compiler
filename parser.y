@@ -4,6 +4,14 @@
 //#include "symbols.h"
 #define YYSTYPE char *
 #define log if (debug == 1) printf
+#define TRUE 1
+#define FALSE 0
+
+typedef struct node{
+    char addr[255];
+    char lexeme[255];
+    char code[255];
+}node;
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -15,7 +23,7 @@ char * gen_temp_id(int);
 char * gen_line_id(int);
 int temp = 0;
 int lines = -1;
-int debug = 1;
+int debug = TRUE;
 %}
 
 %token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
@@ -77,7 +85,7 @@ Stmts:
 ;
 
 Stmt:
-    DeclareStmt                 { printf("\n\n"); }
+    DeclareStmt                 { }
 |   AssignStmt                      { /* empty */ }
 |   PrintfStmt                       { /* empty */ }
 |   ReadStmt                {}
@@ -97,16 +105,16 @@ WhileStmt:
 ;
 
 DeclareStmt:
-    K_INT Id O_SEMI         { printf("var %s", $2); }
+    K_INT Id O_SEMI             { printf("%s: var %s\n",gen_line_id(++lines),$2); }
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI      { printf("%s: %s = %s",gen_line_id(++lines),$1,$3); }
+    Id O_ASSIGN E O_SEMI        { printf("%s: %s = %s \n",gen_line_id(++lines),$1,$3); }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
-    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { printf("print %s\n\n", $3); }
+    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { printf("PRINT %s\n", $3); }
 ;
 
 ReadStmt:
@@ -126,9 +134,9 @@ ReturnStmt:
 
 E:
     E O_ADD E                     { $$ = gen_expr($1,$3,1); }
-|   E O_SUB E                     {  }
-|   E O_MUL E                     {  }
-|   E O_DIV E                     {  }
+|   E O_SUB E                     { $$ = gen_expr($1,$3,2); }
+|   E O_MUL E                     { $$ = gen_expr($1,$3,3); }
+|   E O_DIV E                     { $$ = gen_expr($1,$3,4); }
 |   O_SUB E %prec U_neg           {  }
 |   NUM                         {  }
 |   Id                          {  }
@@ -149,6 +157,10 @@ char * gen_expr(char * s1,char * s2, int op){
         op_char = '+';
     }else if (op == 2){
         op_char = '-';
+    }else if (op == 3){
+        op_char = '*';
+    }else if (op == 4){
+        op_char = '/';
     }
     printf("%s: t%d = %s %c %s \n", gen_line_id(++lines), ++temp, s1, op_char, s2);//temp代表临时变量id，此处需要自加
     return gen_temp_id(temp);
@@ -176,11 +188,6 @@ char * gen_line_id(int no){
     return ret;
 }
 
-typedef struct node{
-    char addr[255];
-    char lexeme[255];
-    char code[255];
-}node;
 
 int main(int argc,char* argv[]) {
 	//yyout = fopen( "out.txt", "w" );
