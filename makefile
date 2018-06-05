@@ -1,17 +1,17 @@
-parser: lex.yy.c y.tab.c
-	gcc y.tab.c lex.yy.c -o parser
+parser: scanner.cpp parser.cpp 
+	g++ scanner.cpp parser.cpp -o parser
 
-scanner:lex.yy.c 
-	gcc -o lex.yy.c
+scanner:scanner.cpp
+	gcc -o scanner.cpp
 
-lex.yy.c: scanner.l
-	flex scanner.l
+scanner.cpp: scanner.l
+	flex -o scanner.cpp scanner.l 
 
-y.tab.c: parser.y
-	bison -vdty parser.y
+parser.cpp: parser.y
+	bison -vdty parser.y -o parser.cpp
 
 clean:
-	rm lex.yy.c lex.yy.exe scanner out.txt y.tab.c y.output y.tab.h parser
+	rm scanner.c scanner parser.cpp out.txt y.output y.tab.h y.tab.c parser parser.cpp parser.hpp parser.output scanner.cpp
 
 run:
 	make && ./parser in.cm

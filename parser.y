@@ -1,11 +1,12 @@
 %{
 #include <stdio.h>
 #include "stdlib.h"
+#include <string>
+#include <iostream>
+using namespace std;
 //#include "symbols.h"
-#define YYSTYPE char *
+#define YYSTYPE std::string
 #define log if (debug == 1) printf
-#define TRUE 1
-#define FALSE 0
 
 typedef struct node{
     char addr[255];
@@ -18,12 +19,12 @@ extern FILE * yyout;
 
 void yyerror(const char*); 
 int yylex();
-char * gen_expr(char*,char*,int);
-char * gen_temp_id(int);
-char * gen_line_id(int);
+string gen_expr(string,string,int);
+string gen_temp_id(int);
+string gen_line_id(int);
 int temp = 0;
 int lines = -1;
-int debug = TRUE;
+int debug = 1;
 %}
 
 %token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
@@ -105,16 +106,16 @@ WhileStmt:
 ;
 
 DeclareStmt:
-    K_INT Id O_SEMI             { printf("%s: var %s\n",gen_line_id(++lines),$2); }
+    K_INT Id O_SEMI             { /*printf("%s: var %s\n",gen_line_id(++lines),$2);*/cout << gen_line_id(++lines) <<": VAR " << $2 << endl; }
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI        { printf("%s: %s = %s \n",gen_line_id(++lines),$1,$3); }
+    Id O_ASSIGN E O_SEMI        { /*printf("%s: %s = %s \n",gen_line_id(++lines),$1,$3);*/cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl; }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
-    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { printf("PRINT %s\n", $3); }
+    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { /*printf("PRINT %s\n", $3);*/ }
 ;
 
 ReadStmt:
@@ -140,7 +141,7 @@ E:
 |   O_SUB E %prec U_neg           {  }
 |   NUM                         {  }
 |   Id                          {  }
-|   O_LSBRACKER E O_RSBRACKER       { printf("( %s )\n",$2); }
+|   O_LSBRACKER E O_RSBRACKER       { /*printf("( %s )\n",$2);*/ }
 ;
 
 Id:
@@ -151,7 +152,7 @@ Id:
 %%
 
 
-char * gen_expr(char * s1,char * s2, int op){
+string gen_expr(string s1,string s2, int op){
     char op_char;
     if (op == 1){
         op_char = '+';
@@ -162,32 +163,22 @@ char * gen_expr(char * s1,char * s2, int op){
     }else if (op == 4){
         op_char = '/';
     }
-    printf("%s: t%d = %s %c %s \n", gen_line_id(++lines), ++temp, s1, op_char, s2);//temp代表临时变量id，此处需要自加
+    //printf("%s: t%d = %s %c %s \n", gen_line_id(++lines), ++temp, s1, op_char, s2);//temp代表临时变量id，此处需要自加
+    cout << gen_line_id(++lines) << ": t" << ++temp << " = " << s1 << " " << op_char << " " << s2 <<endl; 
     return gen_temp_id(temp);
 }
 
-char * gen_temp_id(int no){
-    //生成临时变量id
-    char * ret = (char*)malloc(sizeof(char)*5);
-    ret[0] = 't';
-    char * temp_str = (char*)malloc(sizeof(char)*5);
-    sprintf(temp_str, "%d", no);
-    strcat (ret, temp_str);
-    log("DEBUG::TEMP_ID::%s\n",ret);
+string gen_temp_id(int no){
+    string ret = "t";
+    ret += to_string(no);
     return ret;
 }
 
-char * gen_line_id(int no){
-    //生成行号标签
-    char * ret = (char*)malloc(sizeof(char)*5);
-    ret[0] = 'L';
-    char * temp_str = (char*)malloc(sizeof(char)*5);
-    sprintf(temp_str, "%d", no);
-    strcat (ret, temp_str);
-    log("DEBUG::LINE_ID::%s\n",ret);
+string gen_line_id(int no){
+    string ret = "L";
+    ret += to_string(no);
     return ret;
 }
-
 
 int main(int argc,char* argv[]) {
 	//yyout = fopen( "out.txt", "w" );

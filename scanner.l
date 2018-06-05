@@ -1,9 +1,11 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+using namespace std;
 //#include "symbols.h"
-#define YYSTYPE char *
-#include "y.tab.h"
+#define YYSTYPE string
+#include "parser.hpp"
 
 #define LOG
 
