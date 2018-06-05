@@ -106,16 +106,16 @@ WhileStmt:
 ;
 
 DeclareStmt:
-    K_INT Id O_SEMI             { /*printf("%s: var %s\n",gen_line_id(++lines),$2);*/cout << gen_line_id(++lines) <<": VAR " << $2 << endl; }
+    K_INT Id O_SEMI             { cout << gen_line_id(++lines) <<": VAR " << $2 << endl; }
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI        { /*printf("%s: %s = %s \n",gen_line_id(++lines),$1,$3);*/cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl; }
+    Id O_ASSIGN E O_SEMI        { cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl; }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
-    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { /*printf("PRINT %s\n", $3);*/ }
+    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { cout << gen_line_id(++lines) << ": " << "PRINT " << $3 << endl; }
 ;
 
 ReadStmt:
@@ -141,7 +141,7 @@ E:
 |   O_SUB E %prec U_neg           {  }
 |   NUM                         {  }
 |   Id                          {  }
-|   O_LSBRACKER E O_RSBRACKER       { /*printf("( %s )\n",$2);*/ }
+|   O_LSBRACKER E O_RSBRACKER       { cout << "(" << $2 << ")" << endl; }
 ;
 
 Id:
@@ -163,8 +163,7 @@ string gen_expr(string s1,string s2, int op){
     }else if (op == 4){
         op_char = '/';
     }
-    //printf("%s: t%d = %s %c %s \n", gen_line_id(++lines), ++temp, s1, op_char, s2);//temp代表临时变量id，此处需要自加
-    cout << gen_line_id(++lines) << ": t" << ++temp << " = " << s1 << " " << op_char << " " << s2 <<endl; 
+    cout << gen_line_id(++lines) << ": t" << ++temp << " = " << s1 << " " << op_char << " " << s2 <<endl;//temp代表临时变量id，此处需要自加 
     return gen_temp_id(temp);
 }
 
