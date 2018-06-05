@@ -53,8 +53,8 @@ while 	{ return K_WHILE ;}
 printf	{ return K_PRINTF ;}
 read	{ return K_READ	;}
 
-{ID} 	{ printf("ID\n"); yylval = strdup(yytext); return ID ;}
-{NUM} 	{ printf("NUM\n");yylval = strdup(yytext); return NUM ;}
+{ID} 	{ /*printf("ID\n");*/ yylval = strdup(yytext); return ID ;}
+{NUM} 	{ /*printf("NUM\n");*/yylval = strdup(yytext); return NUM ;}
 
 =	{ return O_ASSIGN ;}
 ,	{ return O_COMMA	 ;}
