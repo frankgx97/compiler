@@ -9,6 +9,7 @@ extern FILE * yyout;
 
 void yyerror(const char*); 
 int yylex();
+char * gen_expr(char*,char*,int);
 %}
 
 %token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
@@ -94,7 +95,7 @@ DeclareStmt:
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI      { printf("pop %s\n\n", $1); }
+    Id O_ASSIGN E O_SEMI      { printf("%s = %s",$1,$3); }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
@@ -118,14 +119,14 @@ ReturnStmt:
 ;
 
 E:
-    E O_ADD E                     { printf("add\n"); }
-|   E O_SUB E                     { printf("sub\n"); }
-|   E O_MUL E                     { printf("mul\n"); }
-|   E O_DIV E                     { printf("div\n"); }
-|   O_SUB E %prec U_neg           { printf("neg\n"); }
-|   NUM                         { printf("push %s\n", $1); }
-|   Id                          { printf("push %s\n", $1); }
-|   '(' E ')'                   { /* empty */ }
+    E O_ADD E                     { $$ = gen_expr($1,$3,1); }
+|   E O_SUB E                     {  }
+|   E O_MUL E                     {  }
+|   E O_DIV E                     {  }
+|   O_SUB E %prec U_neg           {  }
+|   NUM                         {  }
+|   Id                          {  }
+|   O_LSBRACKER E O_RSBRACKER       { printf("( %s )\n",$2); }
 ;
 
 Id:
@@ -134,6 +135,29 @@ Id:
 ;
 
 %%
+
+
+char * gen_expr(char * s1,char * s2, int op){
+    char op_char;
+    if (op == 1){
+        op_char = '+';
+    }else if (op == 2){
+        op_char = '-';
+    }
+    printf("%s %c %s \n",s1, op_char, s2);
+    char * ret = (char*)malloc(sizeof(char)*20);
+    strcpy (ret, s1);
+    ret[strlen(ret)] = op_char;
+    strcat (ret, s2);
+    printf("%s",ret);
+    return ret;
+}
+
+typedef struct node{
+    char addr[255];
+    char lexeme[255];
+    char code[255];
+}node;
 
 int main(int argc,char* argv[]) {
 	//yyout = fopen( "out.txt", "w" );
