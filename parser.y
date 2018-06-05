@@ -1,8 +1,9 @@
 %{
 #include <stdio.h>
-#include <stdlib.h>
+#include "stdlib.h"
 //#include "symbols.h"
 #define YYSTYPE char *
+#define log if (debug == 1) printf
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -10,6 +11,11 @@ extern FILE * yyout;
 void yyerror(const char*); 
 int yylex();
 char * gen_expr(char*,char*,int);
+char * gen_temp_id(int);
+char * gen_line_id(int);
+int temp = 0;
+int lines = -1;
+int debug = 1;
 %}
 
 %token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
@@ -95,7 +101,7 @@ DeclareStmt:
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI      { printf("%s = %s",$1,$3); }
+    Id O_ASSIGN E O_SEMI      { printf("%s: %s = %s",gen_line_id(++lines),$1,$3); }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
@@ -144,12 +150,29 @@ char * gen_expr(char * s1,char * s2, int op){
     }else if (op == 2){
         op_char = '-';
     }
-    printf("%s %c %s \n",s1, op_char, s2);
-    char * ret = (char*)malloc(sizeof(char)*20);
-    strcpy (ret, s1);
-    ret[strlen(ret)] = op_char;
-    strcat (ret, s2);
-    printf("%s",ret);
+    printf("%s: t%d = %s %c %s \n", gen_line_id(++lines), ++temp, s1, op_char, s2);//temp代表临时变量id，此处需要自加
+    return gen_temp_id(temp);
+}
+
+char * gen_temp_id(int no){
+    //生成临时变量id
+    char * ret = (char*)malloc(sizeof(char)*5);
+    ret[0] = 't';
+    char * temp_str = (char*)malloc(sizeof(char)*5);
+    sprintf(temp_str, "%d", no);
+    strcat (ret, temp_str);
+    log("DEBUG::TEMP_ID::%s\n",ret);
+    return ret;
+}
+
+char * gen_line_id(int no){
+    //生成行号标签
+    char * ret = (char*)malloc(sizeof(char)*5);
+    ret[0] = 'L';
+    char * temp_str = (char*)malloc(sizeof(char)*5);
+    sprintf(temp_str, "%d", no);
+    strcat (ret, temp_str);
+    log("DEBUG::LINE_ID::%s\n",ret);
     return ret;
 }
 
