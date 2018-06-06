@@ -3,16 +3,11 @@
 #include "stdlib.h"
 #include <string>
 #include <iostream>
+//#include "utils.h"
 using namespace std;
 //#include "symbols.h"
-#define YYSTYPE std::string
+//#define YYSTYPE Node* //std::string
 #define log if (debug == 1) printf
-
-typedef struct node{
-    char addr[255];
-    char lexeme[255];
-    char code[255];
-}node;
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -25,13 +20,30 @@ string gen_line_id(int);
 int temp = 0;
 int lines = -1;
 int debug = 1;
+
+
+char * genexpr(char * s1, char * s2);
+class CAssignStmt{
+public:
+    string id;
+    string expr;
+    CAssignStmt(string,string);
+};
+CAssignStmt::CAssignStmt(string id,string expr){
+    this->id = id;
+    this->expr =  expr;
+}
+
 %}
 
 %token K_INT K_ELSE K_IF K_RETURN K_VOID K_WHILE K_PRINTF K_READ
-%token ID NO_ID NUM 
+%token <code> ID NUM 
 %token O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER O_RMBRACKER O_LLBRACKER O_RLBRACKER
 %token O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
 %token COMMENT SPACES U_LEGAL
+
+%type <code> E Id
+%type <c_assign> AssignStmt
 
 %left '+' '-'
 %left '*' '/'
@@ -39,6 +51,15 @@ int debug = 1;
 
 %define parse.error verbose 
 %locations
+
+%union{
+    int type;
+    //string *code;
+    char * code;
+    int addr;
+    //Node * node;
+    CAssignStmt * c_assign;
+}
 
 
 %%
@@ -106,16 +127,16 @@ WhileStmt:
 ;
 
 DeclareStmt:
-    K_INT Id O_SEMI             { cout << gen_line_id(++lines) <<": VAR " << $2 << endl; }
+    K_INT Id O_SEMI             { /*cout << gen_line_id(++lines) <<": VAR " << $2 << endl; */}
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI        { cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl; }
+    Id O_ASSIGN E O_SEMI        { string s1=$1;string s2=$3;cout << s2 <<endl;$$ = new CAssignStmt(s1,s2);cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl; }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
 
 PrintfStmt:
-    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { cout << gen_line_id(++lines) << ": " << "PRINT " << $3 << endl; }
+    K_PRINTF O_LSBRACKER Id O_RSBRACKER O_SEMI { /*cout << gen_line_id(++lines) << ": " << "PRINT " << $3 << endl; */}
 ;
 
 ReadStmt:
@@ -129,27 +150,36 @@ CallStmt:
 
 ReturnStmt:
     K_RETURN Id O_SEMI                  {/**/}
-|   K_RETURN E O_SEMI                 {}
-|   K_RETURN O_SEMI                 {}
+|   K_RETURN E O_SEMI                   {}
+|   K_RETURN O_SEMI                     {}
 ;
 
 E:
-    E O_ADD E                     { $$ = gen_expr($1,$3,1); }
-|   E O_SUB E                     { $$ = gen_expr($1,$3,2); }
-|   E O_MUL E                     { $$ = gen_expr($1,$3,3); }
-|   E O_DIV E                     { $$ = gen_expr($1,$3,4); }
+    E O_ADD E                     { printf("%s\n",$1);$$ = genexpr($1,$3); }
+|   E O_SUB E                     { /*$$ = gen_expr($1,$3,2);*/ }
+|   E O_MUL E                     { /*$$ = gen_expr($1,$3,3);*/ }
+|   E O_DIV E                     { /*$$ = gen_expr($1,$3,4);*/ }
 |   O_SUB E %prec U_neg           {  }
-|   NUM                         {  }
-|   Id                          {  }
-|   O_LSBRACKER E O_RSBRACKER       { cout << "(" << $2 << ")" << endl; }
+|   NUM                           { $$ = $1; }
+|   Id                            { }
+|   O_LSBRACKER E O_RSBRACKER       { /*cout << "(" << $2 << ")" << endl;*/ }
 ;
 
 Id:
-    ID                          {}
-|   ID O_LMBRACKER E O_RMBRACKER    {}
+    ID                          {$$=$1;}
+|   ID O_LMBRACKER E O_RMBRACKER    {$$=$1;}
 ;
 
 %%
+
+char * genexpr(char * s1,char * s2){
+    string ss1 = s1;
+    string ss2 = s2;
+    string ret = ss1 + " + " + ss2;
+    char *cret = new char[ret.length() + 1];
+    strcpy(cret, ret.c_str());
+    return cret;
+}
 
 
 string gen_expr(string s1,string s2, int op){
@@ -164,6 +194,8 @@ string gen_expr(string s1,string s2, int op){
         op_char = '/';
     }
     cout << gen_line_id(++lines) << ": t" << ++temp << " = " << s1 << " " << op_char << " " << s2 <<endl;//temp代表临时变量id，此处需要自加 
+    string code = gen_line_id(++lines) + ": t" + to_string(++temp) + " = " + s1 + " " + op_char + " " + s2 + "\n";//temp代表临时变量id，此处需要自加 
+
     return gen_temp_id(temp);
 }
 
