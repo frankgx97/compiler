@@ -35,8 +35,15 @@ char * gen_expr(char * , char * ,int);
 
 class Node{
     public:
-    //vector<Node*> childs;
+    virtual string get_id();
+    virtual string get_expr();
 };
+string Node::get_id(){
+    return "id";
+}
+string Node::get_expr(){
+    return "expr";
+}
 
 /*Statement*/
 
@@ -54,12 +61,20 @@ public:
     string id;
     string expr;
     CAssignStmt(string,string);
+    string get_id();
+    string get_expr();
 };
 CAssignStmt::CAssignStmt(string id,string expr){
     this->type = ASSIGNSTMT;
     this->id = id;
     this->expr =  expr;
-};
+}
+string CAssignStmt::get_id(){
+    return this->id;
+}
+string CAssignStmt::get_expr(){
+    return this->expr;
+}
 
 /*Statements*/
 
@@ -86,9 +101,13 @@ public:
     CStmts * true_stmts;
     CStmts * false_stmts;
     CIfStmt();
+    string get_expr();
 };
 CIfStmt::CIfStmt(){
     this->type = IFSTMT;
+}
+string CIfStmt::get_expr(){
+    return this->expr;
 }
 
 class CFunctionDecl:public Node{
@@ -340,10 +359,9 @@ void reveal(CProgram * prog){
     for(int i=0;i<func->stmts->childs.size();i++){
         if(func->stmts->childs[i]->type == ASSIGNSTMT){
             //cout << func->stmts->childs[i]->id << endl; 
-            cout << "assign" << endl;
+            cout << "##assign"<< func->stmts->childs[i]->get_id() <<" = "<< func->stmts->childs[i]->get_expr() << endl;
         }else if(func->stmts->childs[i]->type == IFSTMT){
-            cout << "##if" + func->stmts->childs[i]->expr  << endl; 
-            cout << "ifstmt" << endl;
+            cout << "##if" + func->stmts->childs[i]->get_expr()  << endl; 
         }
     }
 }
