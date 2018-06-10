@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "Node.h"
+#include "stdarg.h"
 //#include "utils.h"
 using namespace std;
 //#include "symbols.h"
@@ -13,6 +15,8 @@ using namespace std;
 
 #define ASSIGNSTMT 900
 #define IFSTMT 901
+#define EXPR 902
+
 
 extern FILE * yyin;
 extern FILE * yyout;
@@ -24,28 +28,18 @@ int lines = -1;
 int debug = 1;
 
 /*Function Declares*/
-string gen_expr(string,string,int);
+Node *  gen_expr(int, string , int ,...);
 string gen_temp_id(int);
 string gen_line_id(int);
 
+void reveal(Node * node);
 
-char * gen_expr(char * , char * ,int);
 
 /* Class defination */
 
-class Node{
-    public:
-    virtual string get_id();
-    virtual string get_expr();
-};
-string Node::get_id(){
-    return "id";
-}
-string Node::get_expr(){
-    return "expr";
-}
 
 /*Statement*/
+/*
 
 class CStmt:public Node{
 public:
@@ -54,7 +48,6 @@ public:
     string expr;
 };
 
-/*AssignStatement*/
 
 class CAssignStmt:public CStmt{
 public:
@@ -76,7 +69,6 @@ string CAssignStmt::get_expr(){
     return this->expr;
 }
 
-/*Statements*/
 
 class CStmts:public Node{
 public:
@@ -93,7 +85,6 @@ CStmts::CStmts(){
 
 }
 
-/*IfStmt*/
 
 class CIfStmt:public CStmt{
 public:
@@ -139,22 +130,17 @@ int CProgram::add(CFunctionDecl * cFunctionDecl){
 
 
 void reveal(CProgram*);
+*/
 
 %}
 
 %token K_ELSE K_IF K_RETURN K_WHILE K_PRINTF K_READ
-%token <code> ID NUM K_INT K_VOID
+%token <node> ID NUM K_INT K_VOID
 %token O_ASSIGN O_COMMA O_SEMI O_LSBRACKER O_RSBRACKER O_LMBRACKER O_RMBRACKER O_LLBRACKER O_RLBRACKER
 %token O_ADD O_SUB O_MUL O_DIV O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
 %token COMMENT SPACES U_LEGAL
 
-%type <code> E Id FunctionName ReturnType
-%type <c_assign> AssignStmt
-%type <c_if> IfStmt
-%type <c_stmt> Stmt
-%type <c_stmts> Stmts
-%type <c_function> FunctionDeclare
-%type <c_program> Program
+%type <node> E Id FunctionName ReturnType AssignStmt IfStmt Stmt Stmts FunctionDeclare Program
 
 %left '+' '-'
 %left '*' '/'
@@ -168,13 +154,13 @@ void reveal(CProgram*);
     //string *code;
     char * code;
     int addr;
-    //Node * node;
-    CAssignStmt * c_assign;
-    CIfStmt * c_if;
-    CStmt * c_stmt;
-    CStmts * c_stmts;
-    CFunctionDecl * c_function;
-    CProgram * c_program;
+    Node * node;
+    //CAssignStmt * c_assign;
+    //CIfStmt * c_if;
+    //CStmt * c_stmt;
+    //CStmts * c_stmts;
+    //CFunctionDecl * c_function;
+    //CProgram * c_program;
 }
 
 
@@ -183,15 +169,15 @@ void reveal(CProgram*);
 Program:
         /**/                                {/**/}
 |       Program FunctionDeclare             {/**/}
-|       FunctionDeclare                     {   CProgram * cProgram = new CProgram();
+|       FunctionDeclare                     {   /*CProgram * cProgram = new CProgram();
                                                 cProgram->add($1);
                                                 reveal(cProgram);
-                                                $$ = cProgram;
+                                                $$ = cProgram;*/
                                             }
 ;
 
 FunctionDeclare:
-    ReturnType FunctionName O_LSBRACKER Args O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER { char * ty = "int";$$ = new CFunctionDecl(ty,$2,$7); }
+    ReturnType FunctionName O_LSBRACKER Args O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER { /*char * ty = "int";$$ = new CFunctionDecl(ty,$2,$7);*/ }
 ;
 
 ReturnType:
@@ -200,7 +186,7 @@ ReturnType:
 ;
 
 FunctionName:
-    ID                          { $$ = $1; }
+    ID                          { /*$$ = $1;*/ }
 ;
 
 Args:
@@ -220,30 +206,30 @@ ArgType:
 
 Stmts:
     /* empty */             { /* empty */ }
-|   Stmts Stmt              { $1->add($2);$$ = $1;}
-|   Stmt                    {   CStmts * cStmts = new CStmts();
+|   Stmts Stmt              { /*$1->add($2);$$ = $1;*/}
+|   Stmt                    {   /* CStmts * cStmts = new CStmts();
                                 cStmts->add($1);
-                                $$ = cStmts;
+                                $$ = cStmts;*/
                             }
 ;
 
 Stmt:
     DeclareStmt                 { }
-|   AssignStmt                      { $$ = $1; }
+|   AssignStmt                      { /*$$ = $1;*/ }
 |   PrintfStmt                       { /* empty */ }
 |   ReadStmt                {}
 |   CallStmt                { /* empty */ }
 |   ReturnStmt              { /* empty */ }
-|   IfStmt                  {cout << "@@@if"+$1->expr<<endl;$$ = $1;}
+|   IfStmt                  {/*cout << "@@@if"+$1->expr<<endl;$$ = $1;*/}
 |   WhileStmt               {}
 ;
 
 IfStmt:
-    K_IF O_LSBRACKER E O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER    {   CIfStmt * cIfStmt = new CIfStmt();
+    K_IF O_LSBRACKER E O_RSBRACKER O_LLBRACKER Stmts O_RLBRACKER    {   /*CIfStmt * cIfStmt = new CIfStmt();
                                                                         cIfStmt->expr = $3;
                                                                         cIfStmt->true_stmts = $6;
                                                                         cout << "!!if "+cIfStmt->expr<<endl; 
-                                                                        $$ = cIfStmt;
+                                                                        $$ = cIfStmt;*/
                                                                     }
 |   IfStmt K_ELSE O_LLBRACKER Stmts O_RLBRACKER                     {}
 ;
@@ -257,9 +243,9 @@ DeclareStmt:
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI        {   string s1=$1;string s2=$3;
+    Id O_ASSIGN E O_SEMI        {   /*string s1=$1;string s2=$3;
                                     $$ = new CAssignStmt(s1,s2);
-                                    cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl;
+                                    cout << gen_line_id(++lines) << ": "<< $1 << " = " << $3 << endl;*/
                                 }
 |   Id O_ASSIGN CallStmt O_SEMI {}
 ;
@@ -284,13 +270,13 @@ ReturnStmt:
 ;
 
 E:
-    E O_ADD E                     { printf("%s\n",$1);$$ = gen_expr($1,$3,1); }
-|   E O_SUB E                     { printf("%s\n",$1);$$ = gen_expr($1,$3,2); }
-|   E O_MUL E                     { printf("%s\n",$1);$$ = gen_expr($1,$3,3); }
-|   E O_DIV E                     { printf("%s\n",$1);$$ = gen_expr($1,$3,4); }
+    E O_ADD E                     { Node * addNode = new Node(O_ADD, "+");$$ = gen_expr(EXPR, "0", 3, $1, addNode, $3); reveal($$); }
+|   E O_SUB E                     { /*printf("%s\n",$1);$$ = gen_expr($1,$3,2);*/ }
+|   E O_MUL E                     { /*printf("%s\n",$1);$$ = gen_expr($1,$3,3);*/ }
+|   E O_DIV E                     { /*printf("%s\n",$1);$$ = gen_expr($1,$3,4);*/ }
 |   O_SUB E %prec U_neg           {  }
 |   NUM                           { $$ = $1; }
-|   Id                            { }
+|   Id                            { $$ = $1; }
 |   O_LSBRACKER E O_RSBRACKER       { /*cout << "(" << $2 << ")" << endl;*/ }
 ;
 
@@ -301,6 +287,21 @@ Id:
 
 %%
 
+void reveal(Node * node){
+    static int depth = 0;
+    if(!node)return;
+    depth++;
+    
+    for(int i = 0; i < depth-1;i++)cout << '\t';
+    cout << node->value<<endl;
+
+    reveal(node->lchild);
+    depth--;
+    reveal(node->rchild);
+    
+}
+
+/*
 char * gen_expr(char * s1,char * s2,int op){
     char op_char;
     if (op == 1){
@@ -318,6 +319,25 @@ char * gen_expr(char * s1,char * s2,int op){
     char *cret = new char[ret.length() + 1];
     strcpy(cret, ret.c_str());
     return cret;
+}
+*/
+
+Node *  gen_expr(int type, string value , int n, ...){
+    va_list pvar;   
+    va_start (pvar, n);
+    Node * new_node = new Node(type, value);
+    Node * temp = new_node;
+    for (int i=0;i<n;i++){
+        Node * f = va_arg (pvar, Node *);
+        if(temp == new_node){
+            temp->lchild = f;
+        } else {
+            temp->rchild = f;
+        }
+        temp = f;
+    }
+    va_end (pvar);  
+    return new_node;
 }
 
 /*
@@ -350,9 +370,9 @@ string gen_line_id(int no){
     ret += to_string(no);
     return ret;
 }
-
+/*
 void reveal(CProgram * prog){
-    /*试图打印出语法树*/
+    试图打印出语法树
     cout << "------start-------" <<endl;
     CFunctionDecl* func = prog->childs[0];
     cout << func->ret_type << func->name <<endl;
@@ -365,7 +385,7 @@ void reveal(CProgram * prog){
         }
     }
 }
-
+*/
 int main(int argc,char* argv[]) {
 	//yyout = fopen( "out.txt", "w" );
     yyin = fopen(argv[1],"r");

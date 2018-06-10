@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include "utils.h"
+#include "Node.h"
 using namespace std;
 //#include "symbols.h"
-#define YYSTYPE char *
+#define YYSTYPE Node *
 #include "parser.hpp"
 
 #define LOG
@@ -56,8 +56,8 @@ while 	{ return K_WHILE ;}
 printf	{ return K_PRINTF ;}
 read	{ return K_READ	;}
 
-{ID}   { /*printf("ID\n");*/ yylval = strdup(yytext); return ID ;}
-{NUM}  { /*printf("NUM\n");*/yylval = strdup(yytext); return NUM ;}
+{ID}   { /*printf("ID\n");*/	string str = yytext; yylval = new Node(ID, str); return ID ;}
+{NUM}  { /*printf("NUM\n");*/ 	string str = yytext; yylval = new Node(NUM, str); return NUM ;}
 
 =	{ return O_ASSIGN ;}
 ,	{ return O_COMMA	 ;}
