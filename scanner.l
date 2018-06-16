@@ -5,7 +5,7 @@
 #include "Node.h"
 using namespace std;
 //#include "symbols.h"
-#define YYSTYPE Node *
+#define YYSTYPE Node*
 #include "parser.hpp"
 
 #define LOG
@@ -47,40 +47,40 @@ COMMENT	\/\*([^\*^\/]*|[\*^\/*]*|[^\**\/]*)*\*\/
 
 {U_LEGAL} { return U_LEGAL; }
 
-else 	{ return K_ELSE ;}
-if 		{ return K_IF	 ;}
-int 	{ return K_INT	 ;}
-return 	{ return K_RETURN ;}
-void 	{ return K_VOID ;}
-while 	{ return K_WHILE ;}
-printf	{ return K_PRINTF ;}
-read	{ return K_READ	;}
+else 	{ yylval = new Terminal( K_ELSE		, "else" );		return K_ELSE; }
+if 		{ yylval = new Terminal( K_IF		, "if" ); 		return K_IF;}
+int 	{ yylval = new Terminal( K_INT		, "int" ); 		return K_INT;}
+return 	{ yylval = new Terminal( K_RETURN	, "return" );	return K_RETURN; }
+void 	{ yylval = new Terminal( K_VOID		, "void" ); 	return K_VOID;}
+while 	{ yylval = new Terminal( K_WHILE	, "while" ); 	return K_WHILE;}
+printf	{ yylval = new Terminal( K_PRINTF	, "printf" ); 	return K_PRINTF;}
+read	{ yylval = new Terminal( K_READ		, "read" ); 	return K_READ;}
 
-{ID}   { /*printf("ID\n");*/	string str = yytext; yylval = new Node(ID, str); return ID ;}
-{NUM}  { /*printf("NUM\n");*/ 	string str = yytext; yylval = new Node(NUM, str); return NUM ;}
+{ID}   { yylval = new Terminal( ID 	, string(yytext) ); return ID; }
+{NUM}  { yylval = new Terminal( NUM , string(yytext) ); return NUM; }
 
-=	{ return O_ASSIGN ;}
-,	{ return O_COMMA	 ;}
-;	{ return O_SEMI	 ;}
+=	{ yylval = new Terminal( O_ASSIGN	, "=" ); return O_ASSIGN;}
+,	{ yylval = new Terminal( O_COMMA	, "," ); return O_COMMA;}
+;	{ yylval = new Terminal( O_SEMI		, ";" ); return O_SEMI;}
 
-\(	{ return O_LSBRACKER ;}
-\)	{ return O_RSBRACKER ;}
-\[	{ return O_LMBRACKER ;}
-\]	{ return O_RMBRACKER ;}
-\{	{ return O_LLBRACKER ;}
-\}	{ return O_RLBRACKER ;}
+\(	{ yylval = new Terminal( O_LSBRACKER	, "(" ); return O_LSBRACKER; }
+\)	{ yylval = new Terminal( O_RSBRACKER	, ")" ); return O_RSBRACKER; }
+\[	{ yylval = new Terminal( O_LMBRACKER	, "[" ); return O_LMBRACKER; }
+\]	{ yylval = new Terminal( O_RMBRACKER	, "]" ); return O_RMBRACKER; }
+\{	{ yylval = new Terminal( O_LLBRACKER	, "{" ); return O_LLBRACKER; }
+\}	{ yylval = new Terminal( O_RLBRACKER	, "}" ); return O_RLBRACKER; }
 
-\+	{ return O_ADD ;}
-\-	{ return O_SUB ;}
-\* 	{ return O_MUL ;}
-\/	{ return O_DIV ;}
+\+	{ yylval = new Terminal( O_ADD	, "+" ); return O_ADD; }
+\-	{ yylval = new Terminal( O_SUB	, "-" ); return O_SUB; }
+\* 	{ yylval = new Terminal( O_MUL	, "*" ); return O_MUL; }
+\/	{ yylval = new Terminal( O_DIV	, "/" ); return O_DIV; }
 
-\<	{ return O_LESS		 ;}
-\<=	{ return O_L_EQUAL	 ;}
->	{ return O_GREATER	 ;}
->=	{ return O_G_EQUAL	 ;}
-==	{ return O_EQUAL		 ;}
-!=	{ return O_U_EQUAL	 ;}
+\<	{ yylval = new Terminal( O_LESS		, "<" ); 	return O_LESS;}
+\<=	{ yylval = new Terminal( O_L_EQUAL	, "<=" ); 	return O_L_EQUAL;}
+>	{ yylval = new Terminal( O_GREATER	, ">" ); 	return O_GREATER;}
+>=	{ yylval = new Terminal( O_G_EQUAL	, ">=" ); 	return O_G_EQUAL;}
+==	{ yylval = new Terminal( O_EQUAL	, "==" ); 	return O_EQUAL;}
+!=	{ yylval = new Terminal( O_U_EQUAL	, "!=" ); 	return O_U_EQUAL;}
 
 %%
 int yywrap(){ return 1; }

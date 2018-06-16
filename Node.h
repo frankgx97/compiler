@@ -1,20 +1,49 @@
+#ifndef Node_h
+#define Node_h
+
 #include <iostream>
 #include <string>
+#include "stdarg.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+
 using namespace std;
 
 class Node{
-    public:
-    int get_type();//虚函数，返回id属性
-    string get_value();//虚函数，返回expr属性
-    Node * lchild;
-    Node * rchild;
+public:
     int type;
     string value;
-    Node(int type, string value, Node * lchild, Node * rchild);
-    Node(int type, string value){
-        this->type = type;
-        this->value = value;
-        lchild = NULL;
-        rchild = NULL;
-    }
+    Node *lchild, *rchild;
+
+    Node():lchild(NULL),rchild(NULL){}
+
+    virtual bool isTerminal(){return false;};
+    virtual string toString(){return "";};
 };
+
+class Terminal: public Node{
+public:
+    Terminal(int t,string val){
+        value = val;
+        type = t;
+    }
+    string toString(){ return value; }
+    bool isTerminal(){ return true; }
+};
+
+class Var:public Node{
+public:
+    
+    string expr;
+    Var(string e){
+        expr = e;
+    }
+    string toString(){ return expr; }
+    bool isTerminal(){ return false; }
+};
+
+//%define parse.error verbose 
+
+#endif
