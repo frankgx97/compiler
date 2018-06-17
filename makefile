@@ -1,4 +1,4 @@
-parser: scanner.cpp parser.cpp 
+parser: scanner.cpp parser.cpp Node.h
 	g++ scanner.cpp parser.cpp -o parser
 
 scanner:scanner.cpp
