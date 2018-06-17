@@ -52,7 +52,7 @@ string gen_line_id(int no);
 %token <node> O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
 %token <node> COMMENT SPACES U_LEGAL
 
-%type <node> E Id Program
+%type <node> E VAR Program
 %type <node> AssignStmt IfStmt Stmts WhileStmt CallStmt ReturnStmt
 %type <node> Stmt Declaration_list Declaration var_declaration fun_declaration
 %type <node> type_specifier param_list param params local_declaration 
@@ -76,6 +76,7 @@ string gen_line_id(int no);
 
 Program:
         Declaration_list                                { $$ = gen_expr(0,"Program", 1, $1 ); head = $$; }
+;
 
 Declaration_list:
         Declaration Declaration_list    { $$ = gen_expr( 0, "Program", 2, $1, $2 ); }
@@ -85,36 +86,45 @@ Declaration_list:
 Declaration:
 	var_declaration			{ $$ = gen_expr( 2, "Declaration", 1, $1 ); }
 |	fun_declaration			{ $$ = gen_expr( 2, "Declaration", 1, $1 ); }
+;
 
 var_declaration:
 	K_INT ID O_SEMI				{ $$ = gen_expr( 0, "VarDeclare", 3, $1, $2, $3 ); }
 |	K_INT ID O_LMBRACKER NUM O_RMBRACKER O_SEMI	{ $$ = gen_expr( 0, "VarDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+;
 
 fun_declaration:
 	type_specifier ID O_LSBRACKER params O_RSBRACKER compound_stmt 		{ $$ = gen_expr( 0, "FuncDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+;
 
 compound_stmt:
 	O_LLBRACKER local_declaration Stmts O_RLBRACKER		{ $$ = gen_expr( 0, "Compounds", 4, $1, $2, $3, $4 ); }
+;
 
 type_specifier:
 	K_INT		{ $$ = gen_expr( 0, "Type", 1, $1 ); }
 |	K_VOID		{ $$ = gen_expr( 0, "Type", 1, $1 ); }
+;
 
 params:
 	param_list	{ $$ = gen_expr( 0, "Params", 1, $1 ); }
 |	/**/		{ $$ = NULL; }
+;
 
 param_list:
 	param O_COMMA param_list	{ $$ = gen_expr( 0, "ParamList", 3, $1, $2, $3 ); }
 |	param				{ $$ = gen_expr( 0, "ParamList", 1, $1 ); }
+;
 
 param:
 	type_specifier ID				              { $$ = gen_expr( 0, "Param", 2, $1, $2 ); }
 |	type_specifier ID O_LMBRACKER O_RMBRACKER 	   { $$ = gen_expr( 0, "Param", 4, $1, $2, $3, $4 ); }
+;
 
 local_declaration:
 	var_declaration local_declaration	 { $$ = gen_expr( 0, "localDeclare", 2, $1, $2 ); }
 |	/**/					             { $$ = NULL; }
+;
 
 Stmts:
     /* empty */             { $$ = NULL; }
@@ -140,8 +150,8 @@ WhileStmt:
 ;
 
 AssignStmt:
-    Id O_ASSIGN E O_SEMI        { $$ = gen_expr( 20, "Assign", 4, $1, $2, $3, $4 ); }
-|   Id O_ASSIGN CallStmt O_SEMI { $$ = gen_expr( 21, "Assign", 4, $1, $2, $3, $4 );}
+    VAR O_ASSIGN E O_SEMI        { $$ = gen_expr( 20, "Assign", 4, $1, $2, $3, $4 ); }
+|   VAR O_ASSIGN CallStmt O_SEMI { $$ = gen_expr( 21, "Assign", 4, $1, $2, $3, $4 );}
 ;
 
 CallStmt:
@@ -161,11 +171,11 @@ E:
 |   E O_DIV E                     { $$ = gen_expr( 32, "E", 3, $1, $2, $3 ); }
 |   O_SUB E %prec U_neg           {  }
 |   NUM                           { $$ = gen_expr( 2, "E", 1, $1 ); }
-|   Id                            { $$ = gen_expr( 2, "E", 1, $1 ); }
+|   VAR                            { $$ = gen_expr( 2, "E", 1, $1 ); }
 |   O_LSBRACKER E O_RSBRACKER     { $$ = gen_expr( 33, "E", 3, $1, $2, $3 ); }
 ;
 
-Id:
+VAR:
     ID                              { $$ = gen_expr( 2, "Id", 1, $1 );}
 |   ID O_LMBRACKER E O_RMBRACKER    { $$ = gen_expr( 29, "Id", 4, $1, $2, $3, $4 );}
 ;
