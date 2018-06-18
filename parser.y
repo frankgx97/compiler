@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "Node.h"
+#include <stack>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ int yylex();
 int temp = 0;
 int lines = -1;
 int debug = 1;
+stack<string> s;
 
 Node* head = NULL;
 
@@ -31,13 +33,14 @@ Node *  gen_expr(int type, string value , int n, ...);
 
 void reveal(Node * node);
 void code_gen(Node * node);
+void gen_if(Node * node);
 
 template<typename T>
 string to_string(T a);
 
 string gen_temp_id(int no);
 
-string gen_label(int no);
+string gen_label();
 void gen_assign(Node * node);
 
 /* Class defination */
@@ -60,9 +63,8 @@ void gen_assign(Node * node);
 %type <node> type_specifier param_list param params local_declaration 
 %type <node> compound_stmt
 
-%left '+' '-'
-%left '*' '/'
-%right U_neg
+%left O_SUB O_ADD
+%left O_MUL O_DIV
 
 %locations
 
@@ -172,7 +174,6 @@ E:
 |   E O_SUB E                     { $$ = gen_expr( 30, "E", 3, $1, $2, $3 ); }
 |   E O_MUL E                     { $$ = gen_expr( 31, "E", 3, $1, $2, $3 ); }
 |   E O_DIV E                     { $$ = gen_expr( 32, "E", 3, $1, $2, $3 ); }
-|   O_SUB E %prec U_neg           {  }
 |   NUM                           { $$ = gen_expr( 2, "E", 1, $1 ); }
 |   VAR                            { $$ = gen_expr( 2, "E", 1, $1 ); }
 |   O_LSBRACKER E O_RSBRACKER     { $$ = gen_expr( 33, "E", 3, $1, $2, $3 ); }
@@ -219,15 +220,40 @@ void reveal(Node * node){
     
 }
 
-
 void code_gen(Node * node){
     if(!node)return;
     //cout << node->toString()<< endl;
     if(node->toString() == "Assign"){
         gen_assign(node);
     }
+    if(node->toString() == "If"){
+        gen_if(node);
+        return;
+    }
     code_gen(node->lchild);
     code_gen(node->rchild);
+}
+
+void gen_if(Node * node){
+   if(!node)return;
+   if(node->type == 259){
+    cout << node->toString()<<"! "<< endl;
+   }
+    if(node->toString() == "{"){
+        string lb = gen_label();
+        s.push(lb);
+        cout << "goto "<<lb<<endl;
+    }
+    if(node->toString() == "}"){
+        string lb = s.top();
+        s.pop();
+        cout << lb<<": ";
+    }
+    if(node->toString() == "Assign"){
+        gen_assign(node);
+    }
+    gen_if(node->lchild);
+    gen_if(node->rchild); 
 }
 
 void gen_assign(Node * node){
@@ -255,9 +281,9 @@ string gen_temp_id(int no){
     return ret;
 }
 
-string gen_label(int no){
+string gen_label(){
     string ret = "L";
-    ret += to_string(no);
+    ret += to_string(++lines);
     return ret;
 }
 
