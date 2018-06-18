@@ -278,7 +278,7 @@ void reveal(Node * node){
     
 }
 
-string to_string(int a){
+/*string to_string(int a){
     string ret = "";
 //    while(a){
 //        int t = a%10;
@@ -286,7 +286,7 @@ string to_string(int a){
 //        ret = string( '0' + t ) + ret; 
 //    }
     return ret;
-}
+}*/
 
 string genTemp(){
     static int no = 0; 
