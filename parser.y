@@ -30,13 +30,15 @@ Node* head = NULL;
 Node *  gen_expr(int type, string value , int n, ...);
 
 void reveal(Node * node);
+void code_gen(Node * node);
 
 template<typename T>
 string to_string(T a);
 
 string gen_temp_id(int no);
 
-string gen_line_id(int no);
+string gen_label(int no);
+void gen_assign(Node * node);
 
 /* Class defination */
 
@@ -94,7 +96,8 @@ var_declaration:
 ;
 
 fun_declaration:
-	type_specifier ID O_LSBRACKER params O_RSBRACKER compound_stmt 		{ $$ = gen_expr( 0, "FuncDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+	K_INT ID O_LSBRACKER params O_RSBRACKER compound_stmt 		{ $$ = gen_expr( 0, "FuncDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+|	K_VOID ID O_LSBRACKER params O_RSBRACKER compound_stmt 		{ $$ = gen_expr( 0, "FuncDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
 ;
 
 compound_stmt:
@@ -208,12 +211,37 @@ void reveal(Node * node){
     depth++;
     
     for(int i = 0; i < depth-1;i++)cout << '\t';
-    cout << node->toString()<< endl;
+    cout << "type:"<<node->type<<node->toString()<< endl;
 
     reveal(node->lchild);
     depth--;
     reveal(node->rchild);
     
+}
+
+
+void code_gen(Node * node){
+    if(!node)return;
+    //cout << node->toString()<< endl;
+    if(node->toString() == "Assign"){
+        gen_assign(node);
+    }
+    code_gen(node->lchild);
+    code_gen(node->rchild);
+}
+
+void gen_assign(Node * node){
+   if(!node){
+       return;
+   }
+    if(node->type == 267||node->type == 266||node->type == 268||node->type == 277){
+        cout << node->toString();
+    }
+    if(node->type == 270){
+        cout << endl;
+    }
+    gen_assign(node->lchild);
+    gen_assign(node->rchild); 
 }
 
 template<typename T>
@@ -227,7 +255,7 @@ string gen_temp_id(int no){
     return ret;
 }
 
-string gen_line_id(int no){
+string gen_label(int no){
     string ret = "L";
     ret += to_string(no);
     return ret;
@@ -239,4 +267,6 @@ int main(int argc,char* argv[]) {
     //while(yylex());
     yyparse();
     reveal(head);
+    cout << "======"<<endl;
+    code_gen(head);
 }
