@@ -38,6 +38,8 @@ string gen_temp_id(int no);
 
 string gen_line_id(int no);
 
+string newTemp();
+
 /* Class defination */
 
 /*Statement*/
@@ -52,17 +54,18 @@ string gen_line_id(int no);
 %token <node> O_LESS O_L_EQUAL O_GREATER O_G_EQUAL O_EQUAL O_U_EQUAL
 %token <node> COMMENT SPACES U_LEGAL
 
-%type <node> E VAR Program
-%type <node> AssignStmt IfStmt Stmts WhileStmt CallStmt ReturnStmt
-%type <node> Stmt Declaration_list Declaration var_declaration fun_declaration
-%type <node> type_specifier param_list param params local_declaration 
-%type <node> compound_stmt
+%type <node> program declaration_list declaration var_declaration type_specifier fun_declaration 
+%type <node> params param_list param compound_stmt local_declaration statement_list statement 
+%type <node> expression_stmt selection_stmt iteration_stmt return_stmt expression var simple_expression 
+%type <node> relop additive_expression addop term mulop factor call args arg_list matched_if unmatched_if
 
 %left '+' '-'
 %left '*' '/'
 %right U_neg
 
 %locations
+
+%define parse.error verbose
 
 %union{
     int type;
@@ -74,110 +77,166 @@ string gen_line_id(int no);
 
 %%
 
-Program:
-        Declaration_list                                { $$ = gen_expr(0,"Program", 1, $1 ); head = $$; }
+program:
+        declaration_list    { 
+            $$ = gen_expr(0,"Program", 1, $1 ); 
+            head = $$;
+        }
 ;
 
-Declaration_list:
-        Declaration Declaration_list    { $$ = gen_expr( 0, "Program", 2, $1, $2 ); }
-|       Declaration                     { $$ = gen_expr( 1, "Program", 1, $1 ); }
+declaration_list:
+        declaration declaration_list    { $$ = gen_expr( 0, "declaration_list", 2, $1, $2 ); }
+|       declaration                     { $$ = gen_expr( 1, "declaretion_list", 1, $1 ); }
 ;
 
-Declaration:
-	var_declaration			{ $$ = gen_expr( 2, "Declaration", 1, $1 ); }
-|	fun_declaration			{ $$ = gen_expr( 2, "Declaration", 1, $1 ); }
+declaration:
+	var_declaration			{ $$ = gen_expr( 2, "declaration", 1, $1 ); }
+|	fun_declaration			{ $$ = gen_expr( 2, "declaration", 1, $1 ); }
 ;
 
 var_declaration:
-	K_INT ID O_SEMI				{ $$ = gen_expr( 0, "VarDeclare", 3, $1, $2, $3 ); }
-|	K_INT ID O_LMBRACKER NUM O_RMBRACKER O_SEMI	{ $$ = gen_expr( 0, "VarDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+	type_specifier ID O_SEMI				               { $$ = gen_expr( 0, "var_declaration", 3, $1, $2, $3 ); }
+|	type_specifier ID O_LMBRACKER NUM O_RMBRACKER O_SEMI	{ $$ = gen_expr( 0, "var_declaration", 6, $1, $2, $3, $4, $5, $6 ); }
 ;
 
 fun_declaration:
-	type_specifier ID O_LSBRACKER params O_RSBRACKER compound_stmt 		{ $$ = gen_expr( 0, "FuncDeclare", 6, $1, $2, $3, $4, $5, $6 ); }
+	type_specifier ID O_LSBRACKER params O_RSBRACKER compound_stmt 		
+        { $$ = gen_expr( 0, "fun_declare", 6, $1, $2, $3, $4, $5, $6 ); }
 ;
 
 compound_stmt:
-	O_LLBRACKER local_declaration Stmts O_RLBRACKER		{ $$ = gen_expr( 0, "Compounds", 4, $1, $2, $3, $4 ); }
+	O_LLBRACKER local_declaration statement_list O_RLBRACKER		
+        { $$ = gen_expr( 0, "compound_stmt", 4, $1, $2, $3, $4 ); }
 ;
 
 type_specifier:
-	K_INT		{ $$ = gen_expr( 0, "Type", 1, $1 ); }
-|	K_VOID		{ $$ = gen_expr( 0, "Type", 1, $1 ); }
+	K_INT		{ $$ = gen_expr( 2, "type", 1, $1 ); }
+|	K_VOID		{ $$ = gen_expr( 2, "type", 1, $1 ); }
 ;
 
 params:
-	param_list	{ $$ = gen_expr( 0, "Params", 1, $1 ); }
+	param_list	{ $$ = gen_expr( 0, "params", 1, $1 ); }
 |	/**/		{ $$ = NULL; }
 ;
 
 param_list:
-	param O_COMMA param_list	{ $$ = gen_expr( 0, "ParamList", 3, $1, $2, $3 ); }
-|	param				{ $$ = gen_expr( 0, "ParamList", 1, $1 ); }
+	param O_COMMA param_list       { $$ = gen_expr( 0, "param_list", 3, $1, $2, $3 ); }
+|	param	                        { $$ = gen_expr( 0, "param_list", 1, $1 ); }
 ;
 
 param:
-	type_specifier ID				              { $$ = gen_expr( 0, "Param", 2, $1, $2 ); }
-|	type_specifier ID O_LMBRACKER O_RMBRACKER 	   { $$ = gen_expr( 0, "Param", 4, $1, $2, $3, $4 ); }
+	type_specifier ID                              { $$ = gen_expr( 0, "param", 2, $1, $2 ); }
+|	type_specifier ID O_LMBRACKER O_RMBRACKER     { $$ = gen_expr( 0, "param", 4, $1, $2, $3, $4 ); }
 ;
 
 local_declaration:
-	var_declaration local_declaration	 { $$ = gen_expr( 0, "localDeclare", 2, $1, $2 ); }
+	var_declaration local_declaration	 { $$ = gen_expr( 0, "local_declaration", 2, $1, $2 ); }
 |	/**/					             { $$ = NULL; }
 ;
 
-Stmts:
-    /* empty */             { $$ = NULL; }
-|   Stmt Stmts              { $$ = gen_expr( 6, "Stmts", 2, $1, $2 ); }
+statement_list:
+    /* empty */                 { $$ = NULL; }
+|   statement statement_list    { $$ = gen_expr( 6, "statement_list", 2, $1, $2 ); }
 ;
 
-Stmt:
-    AssignStmt                  { $$ = gen_expr( 9, "Stmt", 1, $1 ); }
-|   CallStmt                    { $$ = gen_expr( 12, "Stmt", 1, $1 ); }
-|   compound_stmt               { $$ = gen_expr( 12, "Stmt", 1, $1 ); }
-|   ReturnStmt                  { $$ = gen_expr( 13, "Stmt", 1, $1 ); }
-|   IfStmt                      { $$ = gen_expr( 14, "Stmt", 1, $1 ); }
-|   WhileStmt                   { $$ = gen_expr( 15, "Stmt", 1, $1 ); }
+statement:
+    expression_stmt                 { $$ = gen_expr( 9, "statement", 1, $1 ); }
+|   compound_stmt                   { $$ = gen_expr( 12, "statement", 1, $1 ); }
+|   selection_stmt                  { $$ = gen_expr( 12, "statement", 1, $1 ); }
+|   iteration_stmt                  { $$ = gen_expr( 13, "statement", 1, $1 ); }
+|   return_stmt                     { $$ = gen_expr( 14, "statement", 1, $1 ); }
 ;
 
-IfStmt:
-    K_IF O_LSBRACKER E O_RSBRACKER Stmt   			    { $$ = gen_expr( 16, "If", 5, $1, $2, $3, $4, $5 ); }
-|   K_IF O_LSBRACKER E O_RSBRACKER Stmt K_ELSE Stmt		{ $$ = gen_expr( 18, "If", 7, $1, $2, $3, $4, $5, $6, $7 ); }
+expression_stmt:
+    expression O_SEMI       { $$ = gen_expr( 0, "expression_stmt", 2, $1, $2 ); }
+|   O_SEMI                  { $$ = gen_expr( 0, "expression_stmt", 1, $1 ); }
+
+selection_stmt:
+    matched_if      { $$ = gen_expr( 0, "expression_stmt", 1, $1 ); }
+|   unmatched_if    { $$ = gen_expr( 0, "expression_stmt", 1, $1 ); }
+
+matched_if:
+    K_IF O_LSBRACKER expression O_RSBRACKER statement K_ELSE statement { 
+        $$ = gen_expr( 18, "matched_if", 7, $1, $2, $3, $4, $5, $6, $7 ); 
+ //       $$->addCode( $3  );
+//        $$->addCode( Code( "", iftrue, $3->place, "", $5->lable ) );
+//        $$->addCode( Code( "", jump,   "",        "", $7->lable ) )
+//        $1->false = $7
+    }
+
+unmatched_if:
+    K_IF O_LSBRACKER expression O_RSBRACKER statement   			    
+        { $$ = gen_expr( 16, "unmatched_if", 5, $1, $2, $3, $4, $5 ); }
+|   K_IF O_LSBRACKER expression O_RSBRACKER matched_if K_ELSE unmatched_if		
+        { $$ = gen_expr( 18, "unmatched_if", 7, $1, $2, $3, $4, $5, $6, $7 ); }
 ;
 
-WhileStmt:
-    K_WHILE O_LSBRACKER E O_RSBRACKER Stmts     { $$ = gen_expr( 18, "While", 5, $1, $2, $3, $4, $5 ); }
+iteration_stmt:
+    K_WHILE O_LSBRACKER expression O_RSBRACKER statement     
+        { $$ = gen_expr( 18, "While", 5, $1, $2, $3, $4, $5 ); }
 ;
-
-AssignStmt:
-    VAR O_ASSIGN E O_SEMI        { $$ = gen_expr( 20, "Assign", 4, $1, $2, $3, $4 ); }
-|   VAR O_ASSIGN CallStmt O_SEMI { $$ = gen_expr( 21, "Assign", 4, $1, $2, $3, $4 );}
+expression:
+    var O_ASSIGN expression         { $$ = gen_expr( 0, "expression", 3, $1, $2, $3 ); }
+|   simple_expression               { $$ = gen_expr( 0, "expression", 1, $1 ); }
 ;
-
-CallStmt:
-   ID O_LSBRACKER params O_RSBRACKER O_SEMI CallStmt      { $$ = gen_expr( 24, "Call", 6, $1, $2, $3, $4, $5, $6 ); }
-|  /**/                      { $$ = NULL; }
+return_stmt:
+        K_RETURN expression O_SEMI		{ $$ = gen_expr( 0, "Return", 3, $1, $2, $3 ); }
+|       K_RETURN O_SEMI                 { $$ = gen_expr( 28, "Return", 2, $1, $2 ); }
 ;
-
-ReturnStmt:
-        K_RETURN E O_SEMI		{ $$ = gen_expr( 0, "Return", 3, $1, $2, $3 ); }
-|       K_RETURN O_SEMI         { $$ = gen_expr( 28, "Return", 2, $1, $2 ); }
+var:
+    ID                                       { $$ = gen_expr( 2, "Id", 1, $1 );}
+|   ID O_LMBRACKER expression O_RMBRACKER    { $$ = gen_expr( 29, "Id", 4, $1, $2, $3, $4 );}
 ;
-
-E:
-    E O_ADD E                     { $$ = gen_expr( 29, "E", 3, $1, $2, $3 ); }
-|   E O_SUB E                     { $$ = gen_expr( 30, "E", 3, $1, $2, $3 ); }
-|   E O_MUL E                     { $$ = gen_expr( 31, "E", 3, $1, $2, $3 ); }
-|   E O_DIV E                     { $$ = gen_expr( 32, "E", 3, $1, $2, $3 ); }
-|   O_SUB E %prec U_neg           {  }
-|   NUM                           { $$ = gen_expr( 2, "E", 1, $1 ); }
-|   VAR                            { $$ = gen_expr( 2, "E", 1, $1 ); }
-|   O_LSBRACKER E O_RSBRACKER     { $$ = gen_expr( 33, "E", 3, $1, $2, $3 ); }
+simple_expression:
+    additive_expression relop additive_expression { $$ = gen_expr( 0, "Return", 3, $1, $2, $3 ); }
+|   additive_expression                             { $$ = gen_expr( 2, "Id", 1, $1 ); }
 ;
-
-VAR:
-    ID                              { $$ = gen_expr( 2, "Id", 1, $1 );}
-|   ID O_LMBRACKER E O_RMBRACKER    { $$ = gen_expr( 29, "Id", 4, $1, $2, $3, $4 );}
+relop:
+    O_L_EQUAL   { $$ = gen_expr( 2, "relop", 1, $1 ); }
+|   O_LESS      { $$ = gen_expr( 2, "relop", 1, $1 ); }
+|   O_GREATER   { $$ = gen_expr( 2, "relop", 1, $1 ); }
+|   O_G_EQUAL   { $$ = gen_expr( 2, "relop", 1, $1 ); }
+|   O_EQUAL     { $$ = gen_expr( 2, "relop", 1, $1 ); }
+|   O_U_EQUAL   { $$ = gen_expr( 2, "relop", 1, $1 ); }
+;
+additive_expression:
+    term addop additive_expression  { $$ = gen_expr( 28, "additive_expression", 2, $1, $2 ); }
+|   term                            { $$ = gen_expr( 2, "additive_expression", 1, $1 );}
+;
+addop:
+    O_ADD   { $$ = gen_expr( 2, "addop", 1, $1 ); }
+|   O_SUB   { $$ = gen_expr( 2, "addop", 1, $1 ); }
+;
+term:
+    factor mulop term   { 
+        $$ = gen_expr( 0, "term", 3, $1, $2, $3 );
+//        $$->place = newTemp();
+//        $$->addCode( $1 );
+//        $$->addCode( $3 );
+//        $$->addCode( Lable("",""), )
+    }
+|   factor              { $$ = gen_expr( 2, "term", 1, $1 );}
+;
+mulop:  
+    O_MUL   { $$ = gen_expr( 2, "mulop", 1, $1 ); }
+|   O_DIV   { $$ = gen_expr( 2, "mulop", 1, $1 ); }
+;
+factor:
+    O_LSBRACKER expression O_RSBRACKER  { $$ = gen_expr( 0, "factor", 3, $1, $2, $3 ); }
+|   var                                 { $$ = gen_expr( 2, "factor", 1, $1 ); }
+|   call                                { $$ = gen_expr( 2, "factor", 1, $1 ); }
+|   NUM                                 { $$ = gen_expr( 2, "factor", 1, $1 ); }
+;
+call:
+    ID O_LSBRACKER args O_RSBRACKER     { $$ = gen_expr( 29, "call", 4, $1, $2, $3, $4 );}
+;
+args:
+    arg_list    { $$ = gen_expr( 2, "args", 1, $1 ); }
+|   /**/        { $$ = NULL; }
+;
+arg_list:
+    expression O_COMMA arg_list { $$ = gen_expr( 0, "arg_list", 3, $1, $2, $3 ); }
+|   expression                  { $$ = gen_expr( 2, "arg_list", 1, $1 ); }
 ;
 
 %%
@@ -194,6 +253,9 @@ Node *  gen_expr(int type, string value , int n, ...){
                 temp->lchild = f;
             else 
                 temp->rchild = f;
+
+            for( int i = 0; i < f->codes.size(); i++ )
+                new_node->codes.push_back(f->codes[i]);
             
             temp = f;
         }
@@ -207,7 +269,7 @@ void reveal(Node * node){
     if(!node)return;
     depth++;
     
-    for(int i = 0; i < depth-1;i++)cout << '\t';
+    for(int i = 0; i < depth-1;i++)cout << "|  ";
     cout << node->toString()<< endl;
 
     reveal(node->lchild);
@@ -216,14 +278,20 @@ void reveal(Node * node){
     
 }
 
-template<typename T>
-string to_string(T a){
-    return "";
+string to_string(int a){
+    string ret = "";
+//    while(a){
+//        int t = a%10;
+//        a/=10;
+//        ret = string( '0' + t ) + ret; 
+//    }
+    return ret;
 }
 
-string gen_temp_id(int no){
+string genTemp(){
+    static int no = 0; 
     string ret = "t";
-    ret += to_string(no);
+    ret += to_string(no++);
     return ret;
 }
 
