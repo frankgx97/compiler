@@ -1,5 +1,6 @@
-int main(){
+int main(int argc, int argv[] ){
     x = 5+10;
+    z = argv[5];
     if(5){
         y = 10;
     }

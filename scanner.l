@@ -4,7 +4,6 @@
 #include <string>
 #include "Node.h"
 using namespace std;
-//#include "symbols.h"
 #define YYSTYPE Node*
 #include "parser.hpp"
 
